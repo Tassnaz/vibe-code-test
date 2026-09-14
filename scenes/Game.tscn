@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_script"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="MoveTimer" type="Timer" parent="."]
+wait_time = 0.12
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 220.0
+offset_bottom = 20.0
+text = "Score: 0   Length: 3"
+
+[node name="GameOverLabel" type="Label" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Game Over
+Press Enter to Restart"

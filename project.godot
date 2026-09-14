@@ -11,13 +11,18 @@ config_version=5
 [application]
 
 config/name="Vibe Code Test"
+run/main_scene="res://scenes/Game.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
-config/icon="res://Assets/icon.svg"
+config/icon="res://assets/icon.svg"
 
 [display]
 
-window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/size/viewport_width=320
+window/size/viewport_height=192
+window/size/window_width_override=960
+window/size/window_height_override=576
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
 
 [physics]
 
@@ -26,3 +31,4 @@ window/stretch/aspect="expand"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+2d/snap/snap_2d_transforms_to_pixel=true
