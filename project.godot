@@ -22,7 +22,6 @@ window/size/viewport_height=192
 window/size/window_width_override=960
 window/size/window_height_override=576
 window/stretch/mode="viewport"
-window/stretch/aspect="keep"
 
 [physics]
 
