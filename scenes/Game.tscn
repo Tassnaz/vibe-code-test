@@ -23,27 +23,32 @@ text = "Score: 0   Length: 3"
 
 [node name="GameOverMenu" type="Control" parent="." unique_id=98855361]
 visible = false
+layout_mode = 3
+anchors_preset = 0
 offset_top = 24.0
 offset_right = 320.0
 offset_bottom = 192.0
 mouse_filter = 2
 
-[node name="CenterBox" type="CenterContainer" parent="GameOverMenu"]
-anchors_preset = 15
+[node name="CenterBox" type="CenterContainer" parent="GameOverMenu" unique_id=242146597]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="MenuBox" type="VBoxContainer" parent="GameOverMenu/CenterBox"]
+[node name="MenuBox" type="VBoxContainer" parent="GameOverMenu/CenterBox" unique_id=500263745]
+layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="RestartButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox"]
+[node name="RestartButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox" unique_id=1022350816]
 custom_minimum_size = Vector2(100, 18)
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
 text = "Restart"
 
-[node name="ExitButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox"]
+[node name="ExitButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox" unique_id=1953057628]
 custom_minimum_size = Vector2(100, 18)
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
 text = "Exit"
