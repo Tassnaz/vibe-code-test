@@ -23,10 +23,9 @@ text = "Score: 0   Length: 3"
 
 [node name="GameOverMenu" type="Control" parent="." unique_id=98855361]
 visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 offset_top = 24.0
+offset_right = 320.0
+offset_bottom = 192.0
 mouse_filter = 2
 
 [node name="CenterBox" type="CenterContainer" parent="GameOverMenu"]
