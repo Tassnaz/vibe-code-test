@@ -40,7 +40,10 @@ const EXPLOSION_COLORS := [Color(1.0, 0.85, 0.2), Color(1.0, 0.45, 0.1), Color(0
 
 @onready var move_timer: Timer = $MoveTimer
 @onready var score_label: Label = $ScoreLabel
-@onready var game_over_label: Label = $GameOverLabel
+@onready var game_over_menu: Control = $GameOverMenu
+@onready var reason_label: Label = $GameOverMenu/ReasonLabel
+@onready var restart_button: Button = $GameOverMenu/MenuBox/RestartButton
+@onready var exit_button: Button = $GameOverMenu/MenuBox/ExitButton
 @onready var popup_label: Label = $PopupLabel
 
 var body: Array[Vector2i] = []
@@ -56,8 +59,13 @@ var sparks: Array[Dictionary] = []
 func _ready() -> void:
 	move_timer.wait_time = MOVE_INTERVAL
 	move_timer.timeout.connect(_on_move_timer_timeout)
+	restart_button.pressed.connect(_reset)
+	exit_button.pressed.connect(_on_exit_pressed)
 	popup_label.size = POPUP_SIZE
 	_reset()
+
+func _on_exit_pressed() -> void:
+	get_tree().quit()
 
 func _process(delta: float) -> void:
 	if sparks.is_empty():
@@ -70,7 +78,7 @@ func _process(delta: float) -> void:
 
 func _reset() -> void:
 	game_over = false
-	game_over_label.hide()
+	game_over_menu.hide()
 	score = 0
 	direction = Vector2i.RIGHT
 	next_direction = Vector2i.RIGHT
@@ -94,8 +102,6 @@ func _reset() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if game_over:
-		if event.is_action_pressed("ui_accept"):
-			_reset()
 		return
 
 	var desired := Vector2i.ZERO
@@ -155,8 +161,9 @@ func _on_move_timer_timeout() -> void:
 func _game_over(reason: String = "Game Over") -> void:
 	game_over = true
 	move_timer.stop()
-	game_over_label.text = "%s - Length %d\nPress Enter to Restart" % [reason, body.size()]
-	game_over_label.show()
+	reason_label.text = "%s\nLength: %d" % [reason, body.size()]
+	game_over_menu.show()
+	restart_button.grab_focus()
 
 func _explode(cell: Vector2i) -> void:
 	var center := Vector2(cell) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
