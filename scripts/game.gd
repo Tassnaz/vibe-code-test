@@ -241,28 +241,37 @@ func _spawn_pickup_feedback(cell: Vector2i, points: int, bonus: bool) -> void:
 
 	queue_redraw()
 
+# A stroke centered exactly on a rect drawn at the canvas origin gets half its width
+# clipped off-screen on the top/left, while the bottom/right edges stay fully visible.
+# Insetting the stroke rect by half the width keeps it entirely on-screen on all sides.
+func _draw_outlined_rect(rect: Rect2) -> void:
+	var inset := OUTLINE_WIDTH * 0.5
+	var outline_rect := Rect2(rect.position + Vector2(inset, inset), rect.size - Vector2(OUTLINE_WIDTH, OUTLINE_WIDTH))
+	draw_rect(outline_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
 func _draw() -> void:
 	var board_rect := Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE)
 	draw_rect(board_rect, BG_COLOR)
-	draw_rect(board_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+	_draw_outlined_rect(board_rect)
 
 	var food_color := BONUS_COLOR if food_is_bonus else FOOD_COLOR
 	var food_rect := Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE))
 	draw_rect(food_rect, food_color)
-	draw_rect(food_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+	_draw_outlined_rect(food_rect)
 
 	for bomb in bombs:
 		var center := Vector2(bomb) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
+		var radius := CELL_SIZE * 0.35
 		draw_line(center, center + Vector2(3.0, -CELL_SIZE * 0.4), BOMB_FUSE_COLOR, 1.5)
-		draw_circle(center, CELL_SIZE * 0.35, BOMB_COLOR)
+		draw_circle(center, radius, BOMB_COLOR)
 		draw_circle(center - Vector2(2.0, 2.0), CELL_SIZE * 0.1, BOMB_HIGHLIGHT_COLOR)
-		draw_circle(center, CELL_SIZE * 0.35, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+		draw_circle(center, radius - OUTLINE_WIDTH * 0.5, OUTLINE_COLOR, false, OUTLINE_WIDTH)
 
 	for i in range(body.size()):
 		var color := HEAD_COLOR if i == 0 else SNAKE_COLOR
 		var seg_rect := Rect2(Vector2(body[i]) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE))
 		draw_rect(seg_rect, color)
-		draw_rect(seg_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+		_draw_outlined_rect(seg_rect)
 
 	for spark in sparks:
 		var t: float = spark.life / spark.max_life
