@@ -41,9 +41,8 @@ const EXPLOSION_COLORS := [Color(1.0, 0.85, 0.2), Color(1.0, 0.45, 0.1), Color(0
 @onready var move_timer: Timer = $MoveTimer
 @onready var score_label: Label = $ScoreLabel
 @onready var game_over_menu: Control = $GameOverMenu
-@onready var reason_label: Label = $GameOverMenu/ReasonLabel
-@onready var restart_button: Button = $GameOverMenu/MenuBox/RestartButton
-@onready var exit_button: Button = $GameOverMenu/MenuBox/ExitButton
+@onready var restart_button: Button = $GameOverMenu/CenterBox/MenuBox/RestartButton
+@onready var exit_button: Button = $GameOverMenu/CenterBox/MenuBox/ExitButton
 @onready var popup_label: Label = $PopupLabel
 
 var body: Array[Vector2i] = []
@@ -158,10 +157,9 @@ func _on_move_timer_timeout() -> void:
 
 	queue_redraw()
 
-func _game_over(reason: String = "Game Over") -> void:
+func _game_over() -> void:
 	game_over = true
 	move_timer.stop()
-	reason_label.text = "%s\nLength: %d" % [reason, body.size()]
 	game_over_menu.show()
 	restart_button.grab_focus()
 
@@ -179,7 +177,7 @@ func _explode(cell: Vector2i) -> void:
 			"color": EXPLOSION_COLORS[randi() % EXPLOSION_COLORS.size()],
 		})
 	queue_redraw()
-	_game_over("BOOM! Game Over")
+	_game_over()
 
 func _place_food() -> void:
 	var free_cells: Array[Vector2i] = []

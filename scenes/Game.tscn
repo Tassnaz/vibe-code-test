@@ -29,40 +29,21 @@ anchor_bottom = 1.0
 offset_top = 24.0
 mouse_filter = 2
 
-[node name="ReasonLabel" type="Label" parent="GameOverMenu"]
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -80.0
-offset_top = 6.0
-offset_right = 80.0
-offset_bottom = 30.0
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 10
-theme_override_font_sizes/outline_size = 2
-text = "Game Over
-Length: 3"
-horizontal_alignment = 1
+[node name="CenterBox" type="CenterContainer" parent="GameOverMenu"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 
-[node name="MenuBox" type="VBoxContainer" parent="GameOverMenu"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -50.0
-offset_top = -6.0
-offset_right = 50.0
-offset_bottom = 54.0
+[node name="MenuBox" type="VBoxContainer" parent="GameOverMenu/CenterBox"]
 theme_override_constants/separation = 8
 
-[node name="RestartButton" type="Button" parent="GameOverMenu/MenuBox"]
+[node name="RestartButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox"]
 custom_minimum_size = Vector2(100, 18)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
 text = "Restart"
 
-[node name="ExitButton" type="Button" parent="GameOverMenu/MenuBox"]
+[node name="ExitButton" type="Button" parent="GameOverMenu/CenterBox/MenuBox"]
 custom_minimum_size = Vector2(100, 18)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
