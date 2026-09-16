@@ -48,6 +48,9 @@ const EXPLOSION_SPARK_SPEED_MIN := 60.0
 const EXPLOSION_SPARK_SPEED_MAX := 160.0
 const EXPLOSION_COLORS := [Color(1.0, 0.85, 0.2), Color(1.0, 0.45, 0.1), Color(0.85, 0.15, 0.05)]
 
+const WALL_SHAKE_DURATION := 0.3
+const WALL_SHAKE_MAGNITUDE := 4.0
+
 @onready var move_timer: Timer = $MoveTimer
 @onready var score_label: Label = $ScoreLabel
 @onready var game_over_menu: Control = $GameOverMenu
@@ -65,6 +68,7 @@ var score := 0
 var game_over := false
 var sparks: Array[Dictionary] = []
 var fuse_time := 0.0
+var shake_time_remaining := 0.0
 
 func _ready() -> void:
 	move_timer.wait_time = MOVE_INTERVAL
@@ -91,6 +95,17 @@ func _process(delta: float) -> void:
 	if needs_redraw:
 		queue_redraw()
 
+	if shake_time_remaining > 0.0:
+		shake_time_remaining = max(shake_time_remaining - delta, 0.0)
+		var strength := shake_time_remaining / WALL_SHAKE_DURATION
+		if shake_time_remaining > 0.0:
+			position = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * WALL_SHAKE_MAGNITUDE * strength
+		else:
+			position = Vector2.ZERO
+
+func _start_wall_shake() -> void:
+	shake_time_remaining = WALL_SHAKE_DURATION
+
 func _reset() -> void:
 	game_over = false
 	game_over_menu.hide()
@@ -112,6 +127,8 @@ func _reset() -> void:
 	sparks.clear()
 	popup_label.hide()
 	score_label.scale = Vector2.ONE
+	shake_time_remaining = 0.0
+	position = Vector2.ZERO
 	move_timer.start()
 	queue_redraw()
 
@@ -143,6 +160,7 @@ func _on_move_timer_timeout() -> void:
 	var new_head: Vector2i = body[0] + direction
 
 	if new_head.x < 0 or new_head.x >= GRID_WIDTH or new_head.y < 0 or new_head.y >= GRID_HEIGHT:
+		_start_wall_shake()
 		_game_over()
 		return
 
