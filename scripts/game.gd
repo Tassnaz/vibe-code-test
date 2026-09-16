@@ -10,6 +10,8 @@ const SNAKE_COLOR := Color(0.2, 0.8, 0.3)
 const HEAD_COLOR := Color(0.3, 0.9, 0.4)
 const FOOD_COLOR := Color(0.9, 0.2, 0.2)
 const BG_COLOR := Color(0.1, 0.1, 0.12)
+const OUTLINE_COLOR := Color(1.0, 1.0, 1.0)
+const OUTLINE_WIDTH := 1.0
 
 const FOOD_SCORE := 1
 const FOOD_GROWTH := 1
@@ -240,17 +242,28 @@ func _spawn_pickup_feedback(cell: Vector2i, points: int, bonus: bool) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE), BG_COLOR)
+	var board_rect := Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE)
+	draw_rect(board_rect, BG_COLOR)
+	draw_rect(board_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
 	var food_color := BONUS_COLOR if food_is_bonus else FOOD_COLOR
-	draw_rect(Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), food_color)
+	var food_rect := Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE))
+	draw_rect(food_rect, food_color)
+	draw_rect(food_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
 	for bomb in bombs:
 		var center := Vector2(bomb) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
 		draw_line(center, center + Vector2(3.0, -CELL_SIZE * 0.4), BOMB_FUSE_COLOR, 1.5)
 		draw_circle(center, CELL_SIZE * 0.35, BOMB_COLOR)
 		draw_circle(center - Vector2(2.0, 2.0), CELL_SIZE * 0.1, BOMB_HIGHLIGHT_COLOR)
+		draw_circle(center, CELL_SIZE * 0.35, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
 	for i in range(body.size()):
 		var color := HEAD_COLOR if i == 0 else SNAKE_COLOR
-		draw_rect(Rect2(Vector2(body[i]) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), color)
+		var seg_rect := Rect2(Vector2(body[i]) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE))
+		draw_rect(seg_rect, color)
+		draw_rect(seg_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
 	for spark in sparks:
 		var t: float = spark.life / spark.max_life
 		var color: Color = spark.color
