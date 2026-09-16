@@ -11,11 +11,20 @@ const HEAD_COLOR := Color(0.3, 0.9, 0.4)
 const FOOD_COLOR := Color(0.9, 0.2, 0.2)
 const BG_COLOR := Color(0.1, 0.1, 0.12)
 
+const FOOD_SCORE := 1
+const FOOD_GROWTH := 1
+
+const BONUS_CHANCE := 0.2
+const BONUS_COLOR := Color(0.25, 0.95, 0.35)
+const BONUS_SCORE := 2
+const BONUS_GROWTH := 2
+
 const SPARK_COUNT := 10
 const SPARK_LIFETIME := 0.35
 const SPARK_SPEED_MIN := 40.0
 const SPARK_SPEED_MAX := 90.0
 const SPARK_COLOR := Color(1.0, 0.85, 0.2)
+const BONUS_SPARK_COLOR := Color(0.3, 1.0, 0.4)
 const POPUP_SIZE := Vector2(32.0, 12.0)
 
 @onready var move_timer: Timer = $MoveTimer
@@ -27,6 +36,7 @@ var body: Array[Vector2i] = []
 var direction := Vector2i.RIGHT
 var next_direction := Vector2i.RIGHT
 var food_pos := Vector2i.ZERO
+var food_is_bonus := false
 var score := 0
 var game_over := false
 var sparks: Array[Dictionary] = []
@@ -111,9 +121,13 @@ func _on_move_timer_timeout() -> void:
 
 	body.insert(0, new_head)
 	if ate_food:
-		score += 1
+		var points := BONUS_SCORE if food_is_bonus else FOOD_SCORE
+		var growth := BONUS_GROWTH if food_is_bonus else FOOD_GROWTH
+		score += points
 		_update_score_label()
-		_spawn_pickup_feedback(new_head)
+		_spawn_pickup_feedback(new_head, points, food_is_bonus)
+		for i in range(growth - 1):
+			body.append(body[body.size() - 1])
 		_place_food()
 	else:
 		body.remove_at(body.size() - 1)
@@ -137,12 +151,14 @@ func _place_food() -> void:
 		_game_over()
 		return
 	food_pos = free_cells[randi() % free_cells.size()]
+	food_is_bonus = randf() < BONUS_CHANCE
 
 func _update_score_label() -> void:
 	score_label.text = "Score: %d   Length: %d" % [score, body.size()]
 
-func _spawn_pickup_feedback(cell: Vector2i) -> void:
+func _spawn_pickup_feedback(cell: Vector2i, points: int, bonus: bool) -> void:
 	var center := Vector2(cell) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
+	var spark_color := BONUS_SPARK_COLOR if bonus else SPARK_COLOR
 
 	for i in range(SPARK_COUNT):
 		var angle := (TAU / SPARK_COUNT) * i + randf_range(-0.25, 0.25)
@@ -152,8 +168,11 @@ func _spawn_pickup_feedback(cell: Vector2i) -> void:
 			"vel": Vector2(cos(angle), sin(angle)) * speed,
 			"life": SPARK_LIFETIME,
 			"max_life": SPARK_LIFETIME,
+			"color": spark_color,
 		})
 
+	popup_label.text = "+%d" % points
+	popup_label.add_theme_color_override("font_color", BONUS_COLOR if bonus else Color(1, 0.85, 0.2))
 	popup_label.position = center - POPUP_SIZE * 0.5 - Vector2(0.0, CELL_SIZE * 0.5)
 	popup_label.modulate = Color(1, 1, 1, 1)
 	popup_label.show()
@@ -170,12 +189,13 @@ func _spawn_pickup_feedback(cell: Vector2i) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE), BG_COLOR)
-	draw_rect(Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), FOOD_COLOR)
+	var food_color := BONUS_COLOR if food_is_bonus else FOOD_COLOR
+	draw_rect(Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), food_color)
 	for i in range(body.size()):
 		var color := HEAD_COLOR if i == 0 else SNAKE_COLOR
 		draw_rect(Rect2(Vector2(body[i]) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), color)
 	for spark in sparks:
 		var t: float = spark.life / spark.max_life
-		var color := SPARK_COLOR
+		var color: Color = spark.color
 		color.a = t
 		draw_rect(Rect2(spark.pos - Vector2(1.0, 1.0), Vector2(2.0, 2.0)), color)

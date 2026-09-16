@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dwyx4atrlaty5"]
 
 [ext_resource type="Script" uid="uid://2toaka60lxx6" path="res://scripts/game.gd" id="1_script"]
-[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+[ext_resource type="FontFile" uid="uid://b45limmyj4ai2" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
 
 [node name="Game" type="Node2D" unique_id=1786840624]
 script = ExtResource("1_script")
@@ -16,9 +16,9 @@ offset_right = 260.0
 offset_bottom = 20.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
 theme_override_font_sizes/outline_size = 1
-theme_override_fonts/font = ExtResource("2_font")
 text = "Score: 0   Length: 3"
 
 [node name="GameOverLabel" type="Label" parent="." unique_id=98855361]
@@ -29,21 +29,21 @@ anchor_bottom = 1.0
 offset_top = 24.0
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 12
 theme_override_font_sizes/outline_size = 2
-theme_override_fonts/font = ExtResource("2_font")
 text = "Game Over
 Press Enter to Restart"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PopupLabel" type="Label" parent="."]
+[node name="PopupLabel" type="Label" parent="." unique_id=86389836]
 visible = false
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 8
 theme_override_font_sizes/outline_size = 1
-theme_override_fonts/font = ExtResource("2_font")
+text = "+1"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "+1"
