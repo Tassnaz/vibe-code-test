@@ -27,6 +27,17 @@ const SPARK_COLOR := Color(1.0, 0.85, 0.2)
 const BONUS_SPARK_COLOR := Color(0.3, 1.0, 0.4)
 const POPUP_SIZE := Vector2(32.0, 12.0)
 
+const BOMB_COUNT := 4
+const BOMB_COLOR := Color(0.1, 0.1, 0.12)
+const BOMB_HIGHLIGHT_COLOR := Color(0.4, 0.4, 0.45)
+const BOMB_FUSE_COLOR := Color(0.85, 0.55, 0.15)
+
+const EXPLOSION_SPARK_COUNT := 28
+const EXPLOSION_SPARK_LIFETIME := 0.5
+const EXPLOSION_SPARK_SPEED_MIN := 60.0
+const EXPLOSION_SPARK_SPEED_MAX := 160.0
+const EXPLOSION_COLORS := [Color(1.0, 0.85, 0.2), Color(1.0, 0.45, 0.1), Color(0.85, 0.15, 0.05)]
+
 @onready var move_timer: Timer = $MoveTimer
 @onready var score_label: Label = $ScoreLabel
 @onready var game_over_label: Label = $GameOverLabel
@@ -37,6 +48,7 @@ var direction := Vector2i.RIGHT
 var next_direction := Vector2i.RIGHT
 var food_pos := Vector2i.ZERO
 var food_is_bonus := false
+var bombs: Array[Vector2i] = []
 var score := 0
 var game_over := false
 var sparks: Array[Dictionary] = []
@@ -72,6 +84,7 @@ func _reset() -> void:
 		body.append(Vector2i(start_x - i, start_y))
 
 	_place_food()
+	_place_bombs()
 	_update_score_label()
 	sparks.clear()
 	popup_label.hide()
@@ -112,6 +125,11 @@ func _on_move_timer_timeout() -> void:
 		_game_over()
 		return
 
+	if bombs.has(new_head):
+		body.insert(0, new_head)
+		_explode(new_head)
+		return
+
 	var ate_food := new_head == food_pos
 	# The tail cell vacates this tick unless the snake is growing, so it's a legal move target.
 	var body_to_check := body if ate_food else body.slice(0, body.size() - 1)
@@ -134,24 +152,53 @@ func _on_move_timer_timeout() -> void:
 
 	queue_redraw()
 
-func _game_over() -> void:
+func _game_over(reason: String = "Game Over") -> void:
 	game_over = true
 	move_timer.stop()
-	game_over_label.text = "Game Over - Length %d\nPress Enter to Restart" % body.size()
+	game_over_label.text = "%s - Length %d\nPress Enter to Restart" % [reason, body.size()]
 	game_over_label.show()
+
+func _explode(cell: Vector2i) -> void:
+	var center := Vector2(cell) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
+	for i in range(EXPLOSION_SPARK_COUNT):
+		var angle := randf_range(0.0, TAU)
+		var speed := randf_range(EXPLOSION_SPARK_SPEED_MIN, EXPLOSION_SPARK_SPEED_MAX)
+		var life := EXPLOSION_SPARK_LIFETIME * randf_range(0.6, 1.0)
+		sparks.append({
+			"pos": center,
+			"vel": Vector2(cos(angle), sin(angle)) * speed,
+			"life": life,
+			"max_life": life,
+			"color": EXPLOSION_COLORS[randi() % EXPLOSION_COLORS.size()],
+		})
+	queue_redraw()
+	_game_over("BOOM! Game Over")
 
 func _place_food() -> void:
 	var free_cells: Array[Vector2i] = []
 	for x in range(GRID_WIDTH):
 		for y in range(GRID_HEIGHT):
 			var cell := Vector2i(x, y)
-			if not body.has(cell):
+			if not body.has(cell) and not bombs.has(cell):
 				free_cells.append(cell)
 	if free_cells.is_empty():
 		_game_over()
 		return
 	food_pos = free_cells[randi() % free_cells.size()]
 	food_is_bonus = randf() < BONUS_CHANCE
+
+func _place_bombs() -> void:
+	bombs.clear()
+	for i in range(BOMB_COUNT):
+		var free_cells: Array[Vector2i] = []
+		for x in range(GRID_WIDTH):
+			for y in range(GRID_HEIGHT):
+				var cell := Vector2i(x, y)
+				if not body.has(cell) and cell != food_pos and not bombs.has(cell):
+					free_cells.append(cell)
+		if free_cells.is_empty():
+			return
+		bombs.append(free_cells[randi() % free_cells.size()])
 
 func _update_score_label() -> void:
 	score_label.text = "Score: %d   Length: %d" % [score, body.size()]
@@ -191,6 +238,11 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE), BG_COLOR)
 	var food_color := BONUS_COLOR if food_is_bonus else FOOD_COLOR
 	draw_rect(Rect2(Vector2(food_pos) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), food_color)
+	for bomb in bombs:
+		var center := Vector2(bomb) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
+		draw_line(center, center + Vector2(3.0, -CELL_SIZE * 0.4), BOMB_FUSE_COLOR, 1.5)
+		draw_circle(center, CELL_SIZE * 0.35, BOMB_COLOR)
+		draw_circle(center - Vector2(2.0, 2.0), CELL_SIZE * 0.1, BOMB_HIGHLIGHT_COLOR)
 	for i in range(body.size()):
 		var color := HEAD_COLOR if i == 0 else SNAKE_COLOR
 		draw_rect(Rect2(Vector2(body[i]) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), color)
