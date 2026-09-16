@@ -34,6 +34,13 @@ const BOMB_COUNT := 4
 const BOMB_COLOR := Color(0.1, 0.1, 0.12)
 const BOMB_HIGHLIGHT_COLOR := Color(0.4, 0.4, 0.45)
 const BOMB_FUSE_COLOR := Color(0.85, 0.55, 0.15)
+const BOMB_FUSE_TIP_OFFSET := Vector2(3.0, -CELL_SIZE * 0.4)
+
+const EMBER_CORE_COLOR := Color(1.0, 0.95, 0.6)
+const EMBER_GLOW_COLOR := Color(1.0, 0.45, 0.1)
+const EMBER_BASE_RADIUS := 1.3
+const EMBER_PULSE_AMOUNT := 1.0
+const EMBER_PULSE_SPEED := 7.0
 
 const EXPLOSION_SPARK_COUNT := 28
 const EXPLOSION_SPARK_LIFETIME := 0.5
@@ -57,6 +64,7 @@ var bombs: Array[Vector2i] = []
 var score := 0
 var game_over := false
 var sparks: Array[Dictionary] = []
+var fuse_time := 0.0
 
 func _ready() -> void:
 	move_timer.wait_time = MOVE_INTERVAL
@@ -70,13 +78,18 @@ func _on_exit_pressed() -> void:
 	get_tree().quit()
 
 func _process(delta: float) -> void:
-	if sparks.is_empty():
-		return
-	for spark in sparks:
-		spark.pos += spark.vel * delta
-		spark.life -= delta
-	sparks = sparks.filter(func(s): return s.life > 0.0)
-	queue_redraw()
+	var needs_redraw := not bombs.is_empty()
+	fuse_time += delta
+
+	if not sparks.is_empty():
+		for spark in sparks:
+			spark.pos += spark.vel * delta
+			spark.life -= delta
+		sparks = sparks.filter(func(s): return s.life > 0.0)
+		needs_redraw = true
+
+	if needs_redraw:
+		queue_redraw()
 
 func _reset() -> void:
 	game_over = false
@@ -266,10 +279,20 @@ func _draw() -> void:
 	for bomb in bombs:
 		var center := Vector2(bomb) * CELL_SIZE + Vector2(CELL_SIZE, CELL_SIZE) * 0.5
 		var radius := CELL_SIZE * 0.35
-		draw_line(center, center + Vector2(3.0, -CELL_SIZE * 0.4), BOMB_FUSE_COLOR, 1.5)
+		var fuse_tip := center + BOMB_FUSE_TIP_OFFSET
+		draw_line(center, fuse_tip, BOMB_FUSE_COLOR, 1.5)
 		draw_circle(center, radius, BOMB_COLOR)
 		draw_circle(center - Vector2(2.0, 2.0), CELL_SIZE * 0.1, BOMB_HIGHLIGHT_COLOR)
 		draw_circle(center, radius - OUTLINE_WIDTH * 0.5, OUTLINE_COLOR, false, OUTLINE_WIDTH)
+
+		# Each bomb flickers on its own phase so a row of fuses doesn't pulse in lockstep.
+		var phase := float(bomb.x * 7 + bomb.y * 13)
+		var flicker := 0.5 + 0.5 * sin(fuse_time * EMBER_PULSE_SPEED + phase)
+		var ember_radius := EMBER_BASE_RADIUS + flicker * EMBER_PULSE_AMOUNT
+		var glow_color := EMBER_GLOW_COLOR
+		glow_color.a = 0.3 + 0.3 * flicker
+		draw_circle(fuse_tip, ember_radius + 1.5, glow_color)
+		draw_circle(fuse_tip, ember_radius, EMBER_CORE_COLOR.lerp(EMBER_GLOW_COLOR, 1.0 - flicker))
 
 	for i in range(body.size()):
 		var color := HEAD_COLOR if i == 0 else SNAKE_COLOR
