@@ -10,6 +10,7 @@ const SNAKE_COLOR := Color(0.2, 0.8, 0.3)
 const HEAD_COLOR := Color(0.3, 0.9, 0.4)
 const FOOD_COLOR := Color(0.9, 0.2, 0.2)
 const BG_COLOR := Color(0.1, 0.1, 0.12)
+const BG_COLOR_ALT := Color(0.14, 0.14, 0.17)
 const OUTLINE_COLOR := Color(1.0, 1.0, 1.0)
 const OUTLINE_WIDTH := 1.0
 
@@ -17,7 +18,7 @@ const FOOD_SCORE := 1
 const FOOD_GROWTH := 1
 
 const BONUS_CHANCE := 0.2
-const BONUS_COLOR := Color(0.25, 0.95, 0.35)
+const BONUS_COLOR := Color(0.909, 0.8, 0.186, 1.0)
 const BONUS_SCORE := 2
 const BONUS_GROWTH := 2
 
@@ -250,8 +251,11 @@ func _draw_outlined_rect(rect: Rect2) -> void:
 	draw_rect(outline_rect, OUTLINE_COLOR, false, OUTLINE_WIDTH)
 
 func _draw() -> void:
+	for x in range(GRID_WIDTH):
+		for y in range(GRID_HEIGHT):
+			var cell_color := BG_COLOR if (x + y) % 2 == 0 else BG_COLOR_ALT
+			draw_rect(Rect2(Vector2(x, y) * CELL_SIZE, Vector2(CELL_SIZE, CELL_SIZE)), cell_color)
 	var board_rect := Rect2(Vector2.ZERO, Vector2(GRID_WIDTH, GRID_HEIGHT) * CELL_SIZE)
-	draw_rect(board_rect, BG_COLOR)
 	_draw_outlined_rect(board_rect)
 
 	var food_color := BONUS_COLOR if food_is_bonus else FOOD_COLOR
